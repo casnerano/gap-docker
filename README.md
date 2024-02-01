@@ -9,8 +9,7 @@ make init
 Set env vars to `.env` file. \
 After, a list of targets for the [blackbox-exporter](./etc/prometheus/targets/blackbox.yml) and [node-exporter](./etc/prometheus/targets/node.yml).
 
-To install dashboards in Grafana, \
-you need to download the json files and save them to the `./etc/grafana/provisioning/dashboards` (for example: [Node Exporter Full
+To install dashboards in Grafana, you need to download the json files and save them to the `./etc/grafana/provisioning/dashboards` (for example: [Node Exporter Full
 ](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)).
 ```bash
 make start
