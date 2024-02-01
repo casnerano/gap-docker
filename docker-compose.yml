@@ -52,7 +52,8 @@ services:
     command:
       - "--config.file=/etc/alertmanager/alertmanager.yml"
     environment:
-      - ALERTS_TELEGRAM_TOKEN
+      - ALERTMANAGER_TELEGRAM_BOT_TOKEN
+      - ALERTMANAGER_TELEGRAM_CHAT_ID
     volumes:
       - ./etc/alertmanager:/etc/alertmanager
     depends_on:
