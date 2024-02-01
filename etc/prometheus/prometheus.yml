@@ -26,9 +26,6 @@ scrape_configs:
     metrics_path: /metrics
     follow_redirects: true
     scrape_interval: 15s
-    basic_auth:
-      username: node-exporter
-      password: ""
     file_sd_configs:
       - files:
           - /etc/prometheus/targets/node.yml
