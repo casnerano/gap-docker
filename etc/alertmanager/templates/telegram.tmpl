@@ -1,0 +1,33 @@
+{{- define "__label.severity.icon" -}}
+	{{- if eq .Status "firing" -}}
+		{{- if eq .Labels.severity "critical" -}}
+    		🔴
+		{{- else if eq .Labels.severity "warning" -}}
+			🟡
+		{{- else if eq .Labels.severity "info" -}}
+			🔵
+		{{- else -}}
+			🤷🏻‍♂️
+		{{- end -}}
+	{{- else if eq .Status "resolved" -}}
+		🟢
+	{{- else -}}
+		🤷🏻‍♂️
+	{{- end -}}
+{{- end -}}
+
+{{- define "__label.list" -}}
+	{{- range .Labels.SortedPairs -}}
+		{{- if not (or (eq .Name "instance") (eq .Name "severity")) -}}
+			{{ .Name }}: <code>{{ .Value }}</code>{{ " " }}
+		{{- end -}}
+	{{- end -}}
+{{- end -}}
+
+{{ define "telegram.default" }}
+{{ range .Alerts }}
+{{ template "__label.severity.icon" . }} На сайте <a href="https://{{ .Labels.instance }}">{{ .Labels.instance }}</a> <b>{{ .Annotations.summary | toLower }}</b>.
+<i>{ {{ template "__label.list" . -}} }</i>
+{{ end }}
+📈 Смотреть в <a href="https://monitor.example/">Grafana</a>
+{{ end }}

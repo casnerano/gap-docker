@@ -1,0 +1,75 @@
+groups:
+- name: Node alerts
+  rules:
+
+  - alert: host_out_of_memory
+    expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Нехватка оперативной памяти: менее 10% свободного места"
+
+  - alert: host_unusual_network_throughput_in
+    expr: (sum by (instance) (rate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 100) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Сетевые интерфейсы, вероятно, получают слишком много данных (> 100 MB/s)"
+
+  - alert: host_unusual_network_throughput_out
+    expr: (sum by (instance) (rate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 100) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Сетевые интерфейсы, вероятно, отправляют слишком много данных (> 100 MB/s)"
+
+  - alert: host_unusual_disk_read_rate
+    expr: (sum by (instance) (rate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Вероятно, диск читает слишком много данных (> 50 MB/s)"
+
+  - alert: host_unusual_disk_write_rate
+    expr: (sum by (instance) (rate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 50) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Вероятно, диск записывает слишком много данных (> 50 MB/s)"
+
+  - alert: host_out_of_disk_space
+    expr: ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Диск почти заполнен: менее 10% свободного места"
+
+  - alert: host_high_cpu_load
+    expr: (sum by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total{mode!="idle"}[2m]))) > 0.8) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Высокая загрузка процессора: более 80% загруженности"
+
+  - alert: host_systemd_service_crashed
+    expr: (node_systemd_unit_state{state="failed"} == 1) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Служба systemd вышла из строя"
+
+  - alert: host_requires_reboot
+    expr: (node_reboot_required > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    for: 4h
+    labels:
+      severity: info
+    annotations:
+      summary: "Требуется перезагрузка"

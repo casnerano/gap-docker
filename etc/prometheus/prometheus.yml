@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 1m
+  evaluation_interval: 1m
+
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+
+scrape_configs:
+
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/targets/blackbox.yml
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: 'node'
+    metrics_path: /metrics
+    follow_redirects: true
+    scrape_interval: 15s
+    basic_auth:
+      username: node-exporter
+      password: ""
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/targets/node.yml
+
+alerting:
+  alertmanagers:
+  - static_configs:
+      - targets:
+          - alertmanager:9093

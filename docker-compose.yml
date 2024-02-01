@@ -1,0 +1,69 @@
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=14d"
+    volumes:
+      - ./etc/prometheus:/etc/prometheus
+      - prometheus-data:/data
+    networks:
+      - internal
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter
+    command:
+      - '--config.file=/etc/blackbox_exporter/blackbox.yml'
+    volumes:
+      - ./etc/blackbox_exporter:/etc/blackbox_exporter
+    networks:
+      - internal
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - internal
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD
+    volumes:
+      - ./etc/grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - internal
+
+  alertmanager:
+    image: prom/alertmanager
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+    environment:
+      - ALERTS_TELEGRAM_TOKEN
+    volumes:
+      - ./etc/alertmanager:/etc/alertmanager
+    depends_on:
+      - prometheus
+    networks:
+      - internal
+
+volumes:
+  prometheus-data: {}
+  grafana_data: {}
+
+networks:
+  internal:
+    driver: bridge

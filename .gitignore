@@ -1,0 +1,5 @@
+/public/.well-known
+/etc/nginx/ssl/*
+!/etc/nginx/ssl/.gitkeep
+
+/.env
