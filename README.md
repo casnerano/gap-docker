@@ -1,4 +1,4 @@
-# Prometheus - Grafana - Alertmanager
+# Grafana - Alertmanager - Prometheus
 with blackbox and node exporter configure in docker.
 
 ## Usage
